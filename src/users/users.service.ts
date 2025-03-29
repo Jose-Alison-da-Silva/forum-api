@@ -3,6 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { Prisma, User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -18,9 +19,20 @@ export class UsersService {
   async findAll() {
     return await this.prisma.user.findMany();
   }
-
-  async findOne(id: number) {
-    return await this.prisma.user.findUnique({ where: { id } });
+  async findOne(
+    where: Prisma.UserWhereUniqueInput,
+  ): Promise<Omit<User, 'password'> | null> {
+    return this.prisma.user.findUnique({
+      where: where,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        password: false,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
