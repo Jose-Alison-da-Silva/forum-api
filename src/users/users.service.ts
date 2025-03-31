@@ -21,7 +21,7 @@ export class UsersService {
   }
   async findOne(
     where: Prisma.UserWhereUniqueInput,
-  ): Promise<Omit<User, 'password'> | null> {
+  ): Promise<Omit<User, 'password' | 'createdAt' | 'updatedAt'> | null> {
     return this.prisma.user.findUnique({
       where: where,
       select: {
@@ -29,8 +29,8 @@ export class UsersService {
         email: true,
         name: true,
         password: false,
-        createdAt: true,
-        updatedAt: true,
+        createdAt: false,
+        updatedAt: false,
       },
     });
   }

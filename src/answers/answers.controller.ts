@@ -8,11 +8,14 @@ import {
   Delete,
   UseGuards,
   Request,
+  ParseIntPipe,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AnswersService } from './answers.service';
 import { CreateAnswerDto } from './dto/create-answer.dto';
 import { UpdateAnswerDto } from './dto/update-answer.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { UserId } from 'src/questions/questions.service';
 
 @Controller('answers')
 export class AnswersController {
@@ -21,15 +24,11 @@ export class AnswersController {
   @Post(':questionId')
   @UseGuards(AuthGuard)
   create(
-    @Body() createAnswerDto: CreateAnswerDto,
-    @Request() req: Request & { sub: number },
-    @Param('questionId') questionId: number,
+    @Body(new ValidationPipe()) createAnswerDto: CreateAnswerDto,
+    @Request() req: Request & { sub: UserId },
+    @Param('questionId', ParseIntPipe) questionId: number,
   ) {
-    return this.answersService.create(
-      createAnswerDto,
-      req.sub,
-      Number(questionId),
-    );
+    return this.answersService.create(createAnswerDto, req.sub, questionId);
   }
 
   @Get()
@@ -40,19 +39,22 @@ export class AnswersController {
 
   @Get(':id')
   @UseGuards(AuthGuard)
-  findOne(@Param('id') id: string) {
-    return this.answersService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.answersService.findOne(id);
   }
 
   @Patch(':id')
   @UseGuards(AuthGuard)
-  update(@Param('id') id: string, @Body() updateAnswerDto: UpdateAnswerDto) {
-    return this.answersService.update(+id, updateAnswerDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ValidationPipe()) updateAnswerDto: UpdateAnswerDto,
+  ) {
+    return this.answersService.update(id, updateAnswerDto);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard)
-  remove(@Param('id') id: string) {
-    return this.answersService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.answersService.remove(id);
   }
 }
